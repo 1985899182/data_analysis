@@ -48,7 +48,7 @@ def pre_view():
 def plot_accounts():
     """
     可视化accounts中的数据
-    :return:
+    :return:None
     """
     # frequency的类型分布柱状图
     data1 = accounts_data.groupby("frequency").size()
@@ -66,7 +66,29 @@ def plot_accounts():
     ax2.grid(alpha = 0.7)
     ax2.axvline(31)
 
+    # 绘制不同地区的贷款数量
+    data3 = accounts_data.groupby("district_id").size().sort_index()
+    fig3,ax3 = plt.subplots(nrows=1,ncols=1)
+    sns.barplot(data3,ax = ax3)
+    end_index = max(data3.index) + 1
+    # 将x轴的刻度从-1开始,便于第一个柱子清晰显示
+    ax3.set_xlim(-1,end_index)
+    # 因为从0开始,所有0到4组成5步
+    """
+    eg:
+        | | | | | | | | | |
+        0 1 2 3 4 5 6 7 8 9 (原刻度)
+        1 2 3 4 5 6 7 8 9 10 (从0到原刻度4的时候走了4步(与后面计算方式一直，均不算起点)，从4到原刻度9的时候走了5步)
+        更改原刻度的0，4，9...为刻度后,更改成从1开始,就是1,5,10
+    """
+    ax3.set_xticks([0] + [i for i in range(4,end_index,5)])
+    # 重新设置刻度标签
+    ax3.set_xticklabels([str(1)] + [str(i) for i in range(5,end_index,5)])
+    ax3.grid()
+
     plt.show()
+
+
 if __name__ == "__main__":
 
     # accounts(账户表)
@@ -93,7 +115,8 @@ if __name__ == "__main__":
     process_data()
 
     # 统计并绘制交易类型
-    # plot_accounts()
+    plot_accounts()
+
 
 #    account_id  district_id frequency       date
 # 0         576           55        月结 1993-01-01
