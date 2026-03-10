@@ -1,8 +1,8 @@
 import os
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
+import matplotlib.pyplot as plt
 pd.set_option("display.max_rows",None)
 pd.set_option("display.max_columns",None)
 plt.rcParams['font.family'] = "SimHei"
@@ -69,25 +69,52 @@ def plot_accounts():
     # 绘制不同地区的贷款数量
     data3 = accounts_data.groupby("district_id").size().sort_index()
     fig3,ax3 = plt.subplots(nrows=1,ncols=1)
-    sns.barplot(data3,ax = ax3)
+    ax3.bar(data3.index,data3.values)
     end_index = max(data3.index) + 1
-    # 将x轴的刻度从-1开始,便于第一个柱子清晰显示
-    ax3.set_xlim(-1,end_index)
-    # 因为从0开始,所有0到4组成5步
-    """
-    eg:
-        | | | | | | | | | |
-        0 1 2 3 4 5 6 7 8 9 (原刻度)
-        1 2 3 4 5 6 7 8 9 10 (从0到原刻度4的时候走了4步(与后面计算方式一直，均不算起点)，从4到原刻度9的时候走了5步)
-        更改原刻度的0，4，9...为刻度后,更改成从1开始,就是1,5,10
-    """
-    ax3.set_xticks([0] + [i for i in range(4,end_index,5)])
-    # 重新设置刻度标签
-    ax3.set_xticklabels([str(1)] + [str(i) for i in range(5,end_index,5)])
+    ax3.set_xticks([1] + [i for i in range(5,end_index,5)])
     ax3.grid()
 
     plt.show()
 
+def plot_clients():
+    """
+    可视化clients中的数据
+    :return: None
+    """
+    # 绘制不同客户的年龄分布柱状图
+    fig1, ax1 = plt.subplots(nrows=1, ncols=1)
+    clients_data["birth_date"] = clients_data["birth_date"].dt.year
+    data1 = clients_data.groupby("birth_date").size()
+    sns.barplot(x = data1.index,y = data1.values,ax = ax1)
+    end_index = (max(data1.index) + 1) % 100
+    ax1.set_xticks([0] + [i for i in range(9,end_index,10)])
+    # 重新设置刻度标签
+    ax1.set_xticklabels(["1901"] + [f"19{i:02}" for i in range(10,end_index,10)])
+    ax1.grid()
+
+    fig2, ax2 = plt.subplots(nrows=1, ncols=1)
+    data2 = clients_data.groupby(["district_id", "sex"]).size()
+    index_ = data2.index
+
+    # 提取男性数据
+    male_mask = [i[1] == '男' for i in index_]
+    x_m = np.array([i[0] for i, is_male in zip(index_, male_mask) if is_male])
+    y_m = np.array([data2.loc[i] for i, is_male in zip(index_, male_mask) if is_male])
+
+    # 提取女性数据
+    female_mask = [i[1] == '女' for i in index_]
+    x_w = np.array([i[0] for i, is_female in zip(index_, female_mask) if is_female])
+    y_w = np.array([data2.loc[i] for i, is_female in zip(index_, female_mask) if is_female])
+
+    width = 0.4
+    props_m = {"width": width, "label": "男"}
+    props_w = {"width": width, "label": "女"}
+    ax2.bar(x_m - width / 2, y_m, **props_m)
+    ax2.bar(x_w + width / 2, y_w, **props_w)
+    ax2.set_xticks([1] + [i for i in range(5, len(index_) // 2, 5)])
+    ax2.legend()
+
+    plt.show()
 
 if __name__ == "__main__":
 
@@ -115,8 +142,10 @@ if __name__ == "__main__":
     process_data()
 
     # 统计并绘制交易类型
-    plot_accounts()
+    # plot_accounts()
 
+    # 绘制clients的年龄柱状图
+    plot_clients()
 
 #    account_id  district_id frequency       date
 # 0         576           55        月结 1993-01-01
