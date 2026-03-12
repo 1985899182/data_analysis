@@ -25,6 +25,7 @@ def process_data():
     loans_data['date'] = pd.to_datetime(loans_data['date'])
 
     trans_data['date'] = pd.to_datetime(trans_data['date'])
+    trans_data['amount'] = trans_data['amount'].astype(str).str.replace(r"[,\$]","",regex=True).astype(float)
 
     order_data.dropna(inplace=True)
 
@@ -66,14 +67,6 @@ def plot_accounts():
     ax2.grid(alpha = 0.7)
     ax2.axvline(31)
 
-    # 绘制不同地区的贷款数量
-    data3 = accounts_data.groupby("district_id").size().sort_index()
-    fig3,ax3 = plt.subplots(nrows=1,ncols=1)
-    ax3.bar(data3.index,data3.values)
-    end_index = max(data3.index) + 1
-    ax3.set_xticks([1] + [i for i in range(5,end_index,5)])
-    ax3.grid()
-
     plt.show()
 
 def plot_clients():
@@ -81,7 +74,7 @@ def plot_clients():
     可视化clients中的数据
     :return: None
     """
-    # 绘制不同客户的年龄分布柱状图
+    # 绘制不同客户的开户时间分布柱状图
     fig1, ax1 = plt.subplots(nrows=1, ncols=1)
     clients_data["birth_date"] = clients_data["birth_date"].dt.year
     data1 = clients_data.groupby("birth_date").size()
@@ -92,6 +85,7 @@ def plot_clients():
     ax1.set_xticklabels(["1901"] + [f"19{i:02}" for i in range(10,end_index,10)])
     ax1.grid()
 
+    # 探究各地区客户数量分布
     fig2, ax2 = plt.subplots(nrows=1, ncols=1)
     data2 = clients_data.groupby(["district_id", "sex"]).size()
     index_ = data2.index
@@ -115,6 +109,102 @@ def plot_clients():
     ax2.legend()
 
     plt.show()
+
+
+def plot_loans():
+    """
+    分析贷款金额与贷款期限的关系
+    :return:None
+    """
+    fig1,ax1 = plt.subplots(nrows=1,ncols=1)
+    ax1.scatter(loans_data["duration"],loans_data["amount"])
+    ax1.set_xlabel("/月")
+    ax1.set_ylabel("/元")
+    ax1.set_title("分析贷款金额与贷款期限的关系")
+    ax1.grid()
+
+    plt.show()
+
+def plot_loans_rela_district():
+    """
+    探究不同地区的贷款违约率
+    :return: None
+    """
+    # 先计算每个地区的总数和违约数
+    merged = pd.merge(loans_data, accounts_data, how="inner", on="account_id")
+    data1 = merged.groupby(["district_id", "status"]).size()
+
+    mask = data1.index.get_level_values('status').isin(['B', 'D'])
+    fall_by_district = data1[mask].groupby(level='district_id').sum()
+    total_by_district = data1.groupby(level='district_id').sum()
+    fall_by_district = fall_by_district.reindex(total_by_district.index,fill_value=0)
+    x = data1.index.get_level_values("district_id").unique().tolist()
+    y_total = np.array(total_by_district.tolist())
+    y_fall = np.array(fall_by_district.tolist())
+    y_normal = y_total - y_fall
+    y_fall_by_all = y_fall / y_total
+
+    # 条形堆叠图
+    fig1,ax1 = plt.subplots(nrows=1,ncols=1)
+    ax1.bar(x, y_normal, color='#76FF7B', label='正常还款')
+    ax1.bar(x,y_fall,bottom=y_normal,color='#FF4500', label='违约')
+    ax1.legend()
+    ax1.grid()
+    ax1.tick_params('y',color = 'wheat')
+    ax1.set_axisbelow(True)
+
+    ax2 = ax1.twinx()
+    ax2.plot(x,y_fall_by_all * 100,linewidth = 1,color = 'silver',label = '违约率')
+    ax2.set_ylabel('%',color = 'coral')
+    ax2.tick_params('y', labelcolor='coral')
+    ax2.legend()
+
+    plt.show()
+
+def plot_trans():
+    """
+    分析交易金额的分布（区分借贷）
+    :return:
+    """
+    data1 = trans_data[trans_data['type'] == '借']
+    data2 = trans_data[trans_data['type'] == '贷']
+
+    # 此块数据用于箭头标记
+    lower_quartile1 = data1['amount'].quantile(q = 0.25,interpolation='lower')
+    lower_quartile2 = data2['amount'].quantile(q = 0.25,interpolation='lower')
+    upper_quartile1 = data1['amount'].quantile(q = 0.75,interpolation='higher')
+    upper_quartile2 = data2['amount'].quantile(q = 0.75, interpolation='higher')
+
+    fig1,(ax1,ax2) = plt.subplots(nrows=2,ncols=1,figsize=(8, 10),sharex=True)
+    ax1.set_title('整体')
+    flier_props = {
+        'marker': 'o',  # 标记形状：'o'=圆圈，'.'=点，'s'=方块等
+        'markerfacecolor': 'none',
+        'markersize': 3,
+        'markeredgecolor': 'red',
+        'markeredgewidth': 1,
+        'alpha': 0.8
+    }
+    ax1.boxplot([data1['amount'],data2['amount']],positions=[2,4],flierprops = flier_props)
+    ax1.annotate(upper_quartile1, xy=(2, upper_quartile1), xytext=(3, 20000),
+                 arrowprops=dict(width=1, shrink=0.05, headwidth=3, color='black'))
+    ax1.annotate(upper_quartile2, xy=(4, upper_quartile2), xytext=(3, 30000),
+                 arrowprops=dict(width=1, shrink=0.05, headwidth=3, color='black'))
+    ax1.spines['bottom'].set_visible(False)
+    ax1.grid()
+
+    ax2.set_ylim(0,400)
+    ax2.set_title('局部')
+    ax2.spines['top'].set_visible(False)
+    ax2.annotate(lower_quartile1,xy = (2,lower_quartile1),xytext = (3,100),
+                 arrowprops=dict(width = 1,shrink = 0.05,headwidth = 3,color = 'black'))
+    ax2.annotate(lower_quartile2,xy = (4,lower_quartile2),xytext = (3,200),
+                 arrowprops=dict(width = 1,shrink = 0.05,headwidth = 3,color = 'black'))
+    ax2.boxplot([data1['amount'],data2['amount']],positions=[2,4],tick_labels=["借","贷"])
+    ax2.grid()
+
+    plt.show()
+
 
 if __name__ == "__main__":
 
@@ -141,12 +231,15 @@ if __name__ == "__main__":
     # 数据预处理
     process_data()
 
-    # 统计并绘制交易类型
     # plot_accounts()
 
-    # 绘制clients的年龄柱状图
-    plot_clients()
+    # plot_clients()
 
+    # plot_loans()
+
+    # plot_loans_rela_district()
+
+    plot_trans()
 #    account_id  district_id frequency       date
 # 0         576           55        月结 1993-01-01
 # 1        3818           74        月结 1993-01-01
