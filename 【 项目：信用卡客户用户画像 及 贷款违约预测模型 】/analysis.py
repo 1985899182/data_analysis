@@ -203,6 +203,20 @@ def plot_trans():
     ax2.boxplot([data1['amount'],data2['amount']],positions=[2,4],tick_labels=["借","贷"])
     ax2.grid()
 
+    trans_data['date'] = trans_data['date'].sort_values(ascending=True)
+    amount_sum = trans_data.groupby('date')['amount'].sum()
+    fig3,ax3 = plt.subplots(nrows=1,ncols=1,dpi = 300)
+    ax3.set_title("不同时间的交易量")
+    for i in range(1993,1999):
+        data3 = trans_data.loc[trans_data['date'].dt.year == i]
+        x = data3['date'].dt.dayofyear.unique()
+        y= amount_sum[amount_sum.index.year == i]
+        ax3.plot(x,y,label = f'{i}年',alpha = 0.7)
+    ax3.set_xticks(np.cumsum([0,31,28,30,31,30,31,31,30,31,30,31]))
+    ax3.set_xticklabels([f'{i}月' for i in range (1,13)])
+    ax3.legend()
+    ax3.grid()
+
     plt.show()
 
 
@@ -239,7 +253,9 @@ if __name__ == "__main__":
 
     # plot_loans_rela_district()
 
-    plot_trans()
+    # plot_trans()
+
+
 #    account_id  district_id frequency       date
 # 0         576           55        月结 1993-01-01
 # 1        3818           74        月结 1993-01-01
