@@ -18,9 +18,8 @@
 
 ## 📦 已完成的数据分析案例（Completed Projects）
 
-- 📈 **项目：信用卡客户用户画像及贷款违约预测模型**
-
-未来将持续更新更多数据分析案例。
+- 📈 **项目：信用卡客户用户画像及贷款违约预测模型**  
+  *（持续更新中，未来将添加更多真实业务场景案例）*
 
 ---
 
@@ -76,8 +75,27 @@
 - 权属证明材料  
   （版权证明或授权证明）
 
+**联系方式：**  
+- 邮箱：[1985899182@qq.com](mailto:1985899182@qq.com)  
+- QQ：1985899182
+
 在收到 **符合法律要求的通知后**，我们将在核实后 **第一时间删除相关内容**。
 
 ---
 
-## 🚫 4. 无商业用途声明（Non-Commercial U
+## 🚫 4. 无商业用途声明（Non-Commercial Use）
+
+本平台提供的所有数据（包括但不限于数据集、代码、分析案例等）**仅限于个人学习、研究、教学及技术交流等非商业目的使用**。任何个人、组织或机构不得将本平台数据用于任何商业用途，包括但不限于：
+
+- 直接或间接用于商业产品、服务或解决方案的开发；
+- 将数据作为商业项目的一部分进行分发、销售或许可；
+- 用于盈利性质的培训、咨询或广告活动；
+- 在其他任何以营利为目的的场景中使用。
+
+若您希望将本平台数据用于商业目的，**必须自行联系数据的原始作者或权利人，获取正式书面授权**，并遵守相关法律法规及授权协议。未经授权擅自将数据用于商业用途的行为，可能构成对知识产权所有者的侵权，相关法律责任由使用者自行承担。
+
+本平台对任何未经授权的商业使用行为不承担任何责任，并保留追究其法律责任的权利。
+
+---
+
+*All data provided on this platform are intended for personal learning, research, education, and technical exchange purposes only. Any commercial use, including but not limited to integration into commercial products, services, or profit‑making activities, is strictly prohibited without explicit written permission from the original copyright holders. Users seeking commercial use must independently obtain proper authorization. Unauthorized commercial use may constitute intellectual property infringement, and the platform assumes no liability for such actions.*
