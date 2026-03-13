@@ -1,11 +1,6 @@
-```markdown
-<div align="center">
-
 # 📊 Data Analysis Datasets
 
-<sub>📚 用于数据分析学习与实践的数据集仓库</sub>
-
-</div>
+📚 用于数据分析学习与实践的数据集仓库
 
 ---
 
@@ -31,7 +26,7 @@
 
 # 📊 数据使用免责声明（Data Usage Disclaimer）
 
-<sub>Last Updated: 2026-03-13</sub>
+**Last Updated: 2026-03-13**
 
 ---
 
@@ -86,4 +81,3 @@
 ---
 
 ## 🚫 4. 无商业用途声明（Non-Commercial U
-```
