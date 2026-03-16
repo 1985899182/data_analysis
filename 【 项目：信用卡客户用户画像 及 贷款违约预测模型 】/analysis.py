@@ -219,6 +219,47 @@ def plot_trans():
 
     plt.show()
 
+def plot_order():
+    """
+    分析定期支付类型（k_symbol）的分布
+    :return:None
+    """
+    data1 = order_data.groupby('k_symbol').size()
+
+    fig1,ax1 = plt.subplots(nrows=1,ncols=1)
+    ax1.pie(data1.values,shadow=True,explode=[0.02] *  len(data1),autopct='%.2f%%',labels = data1.index)
+    ax1.legend()
+
+    plt.show()
+
+def plot_card_rela_client():
+    """
+    分析不同性别客户持有信用卡的比例
+    :return: None
+    """
+    data1 = pd.merge(clients_data,disp_data,on='client_id',how='inner') [['sex','disp_id']]
+    data2 = pd.merge(data1,card_data,on = 'disp_id',how="inner")[['sex','type']]
+    data3 = data2.groupby(['sex','type']).size()
+
+    golden_w = data3.loc[('女','金卡')]
+    golden_m = data3.loc[('男','金卡')]
+    teenager_w = data3.loc[('女','青年卡')]
+    teenager_m = data3.loc[('男','青年卡')]
+    normal_w = data3.loc[('女','普通卡')]
+    normal_m = data3.loc[('男','普通卡')]
+
+    normal_ls = np.array([normal_w, normal_m])
+    teenager_ls = np.array([teenager_w , teenager_m])
+    golden_ls = np.array([golden_w,golden_m])
+
+    fig1,ax1 = plt.subplots(nrows=1,ncols=1)
+    ax1.bar(['女','男'],normal_ls,label = ['女性持有普通卡总数量','男性持有普通卡总数量'])
+    ax1.bar(['女','男'],teenager_ls,bottom = normal_ls,label = ['女性持有青年卡总数量','男性持有青年卡总数量'])
+    ax1.bar(['女','男'],golden_ls,bottom = teenager_ls + normal_ls,label = ['女性持有金卡总数量','男性持有金卡总数量'])
+    ax1.legend(loc = "lower left")
+    ax1.grid()
+    ax1.set_axisbelow(True)
+    plt.show()
 
 if __name__ == "__main__":
 
@@ -245,76 +286,17 @@ if __name__ == "__main__":
     # 数据预处理
     process_data()
 
-    # plot_accounts()
+    plot_accounts()
 
-    # plot_clients()
+    plot_clients()
 
-    # plot_loans()
+    plot_loans()
 
-    # plot_loans_rela_district()
+    plot_loans_rela_district()
 
-    # plot_trans()
+    plot_trans()
 
+    plot_order()
 
-#    account_id  district_id frequency       date
-# 0         576           55        月结 1993-01-01
-# 1        3818           74        月结 1993-01-01
-# 2         704           55        月结 1993-01-01
-# 3        2378           16        月结 1993-01-01
-# 4        2632           24        月结 1993-01-02
-
-#    card_id  disp_id       date type
-# 0     1005     9285 1993-11-07  普通卡
-# 1      104      588 1994-01-19  普通卡
-# 2      747     4915 1994-02-05  普通卡
-# 3       70      439 1994-02-08  普通卡
-# 4      577     3687 1994-02-15  普通卡
-
-#    client_id sex birth_date  district_id
-# 0          1   女 1970-12-13           18
-# 1          2   男 1945-02-04            1
-# 2          3   女 1940-10-09            1
-# 3          4   男 1956-12-01            5
-# 4          5   女 1960-07-03            5
-
-#    disp_id  client_id  account_id type
-# 0        1          1           1  所有者
-# 1        2          2           2  所有者
-# 2        3          3           2   用户
-# 3        4          4           3  所有者
-# 4        5          5           3   用户
-
-#    A1     GDP       A4    A10    A11   A12   A13  A14   A15   a16
-# 0   1  283894  1204953  100.0  12541  0.29  0.43  167  35.6  41.1
-# 1   2   11655    88884   46.7   8507  1.67  1.85  132  12.1  15.0
-# 2   3   13146    75232   41.7   8980  1.95  2.21  111  18.8  18.7
-# 3   4   16108   149893   67.4   9753  4.64  5.05  109  17.5  19.7
-# 4   5   13452    95616   51.4   9307  3.85  4.43  118  13.7  15.9
-
-#    loan_id  account_id       date  amount  duration  payments status
-# 0     5314        1787 1993-07-05   96396        12      8033      B
-# 1     5316        1801 1993-07-11  165960        36      4610      A
-# 2     6863        9188 1993-07-28  127080        60      2118      A
-# 3     5325        1843 1993-08-03  105804        36      2939      A
-# 4     7240       11013 1993-09-06  274740        60      4579      A
-
-#       order_id  account_id bank_to  account_to  amount k_symbol
-# 1379     29406           3      AB    59972357  3539.0     保险支付
-# 1380     29434          25      WX    52864879   164.0     保险支付
-# 1381     29441          29      UV    41335338     8.0     保险支付
-# 1382     29454          37      YZ    89609831    97.0     保险支付
-# 1383     29458          38      OP    64685678   228.0     保险支付
-
-#    trans_id  account_id       date type operation  amount balance k_symbol  \
-# 0    695247        2378 1993-01-01    贷      信贷资金    $700    $700      NaN
-# 1    171812         576 1993-01-01    贷      信贷资金    $900    $900      NaN
-# 2    207264         704 1993-01-01    贷      信贷资金  $1,000  $1,000      NaN
-# 3   1117247        3818 1993-01-01    贷      信贷资金    $600    $600      NaN
-# 4    579373        1972 1993-01-02    贷      信贷资金    $400    $400      NaN
-#   bank  account
-# 0  NaN      NaN
-# 1  NaN      NaN
-# 2  NaN      NaN
-# 3  NaN      NaN
-# 4  NaN      NaN
+    plot_card_rela_client()
 
