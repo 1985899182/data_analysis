@@ -4,7 +4,7 @@ from load_data import load_data
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
+import statsmodels.api as sm
 plt.rcParams['font.family'] = 'SimHei'
 plt.rcParams['axes.unicode_minus'] = False
 pd.set_option('display.max_columns',None)
@@ -25,9 +25,9 @@ def plot_price_distribution():
     ax1.legend()
     plt.show()
 
-def plot_price_rela_area():
+def plot_judge_price_rela_area():
     """
-    房价和面积的关系
+    判断房价和面积的关系
     :return: None
     """
 
@@ -62,6 +62,13 @@ def plot_price_rela_area():
     # mark_inset(ax1,axins,loc1=2, loc2=4, ec='red')
 
     plt.show()
+
+    # 用OLS模型检验是否存在房价随面积递增而递减
+    data2 = sm.add_constant(data2)
+    # y在前x在后
+    model = sm.OLS(data3,data2).fit()
+    print(model.summary())
+    # 结论是不存在
 
 def plot_price_rela_room():
     """
@@ -105,10 +112,31 @@ def plot_price_rela_room():
 
     plt.show()
 
+
+def plot_sch_sub_rela_price():
+    """
+    比较学区房，地铁房对房价的影响
+    :return: None
+    """
+    data1 = pd.concat([data[i][['school','subway','per_price']] for i in data.keys()])
+    data2 = data1.groupby(['school','subway'])
+    data3 = [data2.get_group(i)['per_price'].mean() for i in data2.groups.keys()]
+
+    fig1,ax1 = plt.subplots(nrows=1,ncols=1)
+    ax1.bar(["no_shc_sub","no_sch","no_sub","have_sch_sub"],data3,color =['#FFB6C1', '#98FB98', '#87CEEB', '#DDA0DD'])
+    ax1.set_title('有无学区房/地铁站对房价的普遍影响')
+    ax1.set_ylabel('万元/平方米')
+    ax1.tick_params('y',rotation = 45)
+    ax1.grid()
+    ax1.set_axisbelow(True)
+    fig1.show()
+
 if __name__ == "__main__":
     data = load_data()
-    # plot_price_distribution()
+    plot_price_distribution()
 
-    # plot_price_rela_area()
+    plot_judge_price_rela_area()
 
-    # plot_price_rela_room()
+    plot_price_rela_room()
+
+    plot_sch_sub_rela_price()
